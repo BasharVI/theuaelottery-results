@@ -1,0 +1,60 @@
+name: Post UAE Lottery Results
+
+on:
+  # Run daily at 17:35 UTC = 21:35 Asia/Dubai
+  schedule:
+    - cron: "35 17 * * *"
+  # Allow manual trigger
+  workflow_dispatch: {}
+
+permissions:
+  contents: write  # needed if we commit updated Excel files
+
+concurrency:
+  group: post-uae-results
+  cancel-in-progress: true
+
+jobs:
+  run-results:
+    runs-on: ubuntu-latest
+    env:
+      # Inject secrets as environment variables your app expects
+      P3_URL: ${{ secrets.P3_URL }}
+      P4_URL: ${{ secrets.P4_URL }}
+      TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+      TELEGRAM_CHANNEL_ID: ${{ secrets.TELEGRAM_CHANNEL_ID }}
+      # Optional: set TZ for logs (your code already uses Asia/Dubai via Luxon)
+      TZ: Asia/Dubai
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Use Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+
+      - name: Install deps
+        run: npm ci
+
+      - name: Run poster
+        run: npm start
+
+      - name: Commit updated Excel files (if any)
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "actions@github.com"
+
+          # See if any .xlsx files changed (new or modified)
+          CHANGES=$(git status --porcelain | grep -E '\.xlsx$' || true)
+          if [ -n "$CHANGES" ]; then
+            git add *.xlsx || true
+            git commit -m "chore(results): update lottery results $(date -u +'%Y-%m-%dT%H:%M:%SZ')"
+            git push
+          else
+            echo "No Excel changes to commit."
+          fi
