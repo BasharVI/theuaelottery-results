@@ -13,10 +13,14 @@ const P4_URL = process.env.P4_URL;  // Pick 4
 function warn(label, err) {
   console.warn(`${label}:`, err?.message || err);
 }
-
 function formatTelegramMessage(item) {
-  // e.g., "<b>Pick 3</b> — <code>250917</code> — <b>1-9-5</b> (2025-09-17)"
-  return `<b>${item.game}</b> — <code>${item.phase}</code> — <b>${item.result}</b> (${item.dateISO})`;
+  return (
+    `🎉 <b>The UAE Lottery – ${item.game}</b> 🎉\n\n` +
+    `📅 <b>Date:</b> ${item.dateISO}\n` +
+    `🏆 <b>Draw No:</b> ${item.phase}\n` +
+    `🔢 <b>Winning Numbers:</b> ${item.result.split('-').join(', ')}\n\n` +
+    `#UAELottery #${item.game.replace(/\s+/g, '')} #LuckyDraw #WinBig`
+  );
 }
 
 (async () => {
