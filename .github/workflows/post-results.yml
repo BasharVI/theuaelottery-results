@@ -1,9 +1,9 @@
 name: Post UAE Lottery Results
 
 on:
-  # Run daily at 17:35 UTC = 21:35 Asia/Dubai
+  # Run daily at 17:35 UTC = 21:32 Asia/Dubai
   schedule:
-    - cron: "35 17 * * *"
+    - cron: "32 17 * * *"
   # Allow manual trigger
   workflow_dispatch: {}
 
@@ -46,14 +46,14 @@ jobs:
 
       - name: Commit updated Excel files (if any)
         run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "actions@github.com"
+          git config user.name "BasharVI"
+          git config user.email "basharvismail@gmail.com"
 
           # See if any .xlsx files changed (new or modified)
           CHANGES=$(git status --porcelain | grep -E '\.xlsx$' || true)
           if [ -n "$CHANGES" ]; then
             git add *.xlsx || true
-            git commit -m "chore(results): update lottery results $(date -u +'%Y-%m-%dT%H:%M:%SZ')"
+            git commit -m "chore(results): Auto-update draw results on excel $(date -u +'%Y-%m-%dT%H:%M:%SZ')"
             git push
           else
             echo "No Excel changes to commit."
